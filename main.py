@@ -25,5 +25,7 @@ class test(unittest.TestCase):
         file = "/mnt/m/d05/hfo_envelopes/sleep/seeg-102/raw_files/seeg-102_00.h5"
         H = H5(path=file)
         bi = H.read_ts_channel_basic_info_df()
+        for data, meta in SessionSampleIterator(session=H,window=15000,step=5000).select_channels(channel_map=['B1','C1']):
+            stop = 1
 
         stop = 1

@@ -29,3 +29,19 @@ class H5:
 
     def read_ts_channel_basic_info_df(self):
         return channel_sort_df(pd.DataFrame(self.read_ts_channel_basic_info()),'name')
+
+    def read_ts_channels_sample(self,channel_map: list, sample_map: list):
+        if isinstance(channel_map,str):
+            channel_map = [channel_map]
+
+        ch_idxs = []
+        for ch in channel_map:
+            if ch in self._channels:
+                ch_idxs.append(self._channels.index(ch))
+            else:
+                raise Exception(f"Invalid channel name: {ch}")
+
+        if len(ch_idxs) == 0:
+            raise Exception("Empty channel list!")
+
+        return self._data[ch_idxs,sample_map[0]:sample_map[1]]
