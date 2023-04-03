@@ -33,7 +33,7 @@ class SessionSampleIterator():
 
 
     def __len__(self):
-        return len(self._scheme)
+        return len(self._iter)
 
     def __getitem__(self, item):
         signal = self.session.read_ts_channels_sample(channel_map=self._iter.iloc[item]['channel_name'],
