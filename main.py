@@ -1,9 +1,12 @@
+
+import torch
 from dataloaders.dfile import DFile
 from dataloaders.mef3 import Mef3
 from dataloaders.h5 import H5
-
+from pipelines import pipeline_torch
 import unittest
 from iterators import SessionSampleIterator
+from utils import generate_PDM_matrix
 
 class test(unittest.TestCase):
     def test_dfile(self):
@@ -29,3 +32,46 @@ class test(unittest.TestCase):
             stop = 1
 
         stop = 1
+
+
+    def test_pipeline(self):
+        file = "/mnt/m/d05/hfo_envelopes/sleep/seeg-102/raw_files/seeg-102_00.h5"
+        H = H5(path=file)
+
+        I = SessionSampleIterator(H,window=5000,step=5000)
+
+        class Power(torch.nn.Module):
+            classNames = ['Power']
+            def __init__(self):
+                super().__init__()
+
+            def forward(self,x):
+                x = torch.pow(x,2)
+                x = x.mean()
+                return x
+
+            def inference(self,x):
+                x = torch.from_numpy(x).float()
+                return self.forward(x)
+
+
+        class Features(torch.nn.Module):
+            classNames = ['Power1','Power2']
+            def __init__(self):
+                super().__init__()
+                self.feature1 = Power()
+                self.feature2 = Power()
+            def inference(self,x):
+                x = torch.from_numpy(x).float()
+                return torch.stack([self.feature1(x),
+                                    self.feature2(x)]).view(len(Features.classNames))
+
+
+
+
+        result = pipeline_torch(I,Power())
+        generate_PDM_matrix(result,'Power',plot=True)
+        stop = 1
+
+
+
