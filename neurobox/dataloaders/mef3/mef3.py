@@ -1,6 +1,6 @@
 from pymef import MefSession
 import pandas as pd
-from utils import channel_sort_df
+from neurobox.utils import channel_sort_df
 
 class Mef3(MefSession):
     def read_ts_channel_basic_info_df(self):

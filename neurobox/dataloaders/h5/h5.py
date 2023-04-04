@@ -1,7 +1,7 @@
 
 
 import h5py
-from utils import *
+from neurobox.utils import *
 
 
 class H5:

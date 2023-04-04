@@ -1,5 +1,5 @@
 import pandas as pd
-from utils import channel_sort_df
+from neurobox.utils import channel_sort_df
 import matplotlib.pyplot as plt
 import numpy as np
 

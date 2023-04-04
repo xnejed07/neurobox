@@ -1,12 +1,12 @@
 
 import torch
-from dataloaders.dfile import DFile
-from dataloaders.mef3 import Mef3
-from dataloaders.h5 import H5
-from pipelines import pipeline_torch
+from neurobox.dataloaders import DFile
+from neurobox.dataloaders import Mef3
+from neurobox.dataloaders.h5 import H5
+from neurobox.pipelines import pipeline_torch
 import unittest
-from iterators import SessionSampleIterator
-from utils import generate_PDM_matrix
+from neurobox.iterators import SessionSampleIterator
+from neurobox.utils import generate_PDM_matrix
 
 class test(unittest.TestCase):
     def test_dfile(self):

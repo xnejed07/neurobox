@@ -2,7 +2,7 @@ import binio
 import numpy as np
 import pandas as pd
 
-from utils.helper_code import channel_sort_df
+from neurobox.utils.helper_code import channel_sort_df
 
 
 class DFile():
