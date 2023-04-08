@@ -13,9 +13,8 @@ def pipeline_torch(sampleIterator, model):
             y = y.data.cpu().numpy()
             metas.append(meta)
             outputs.append(y)
-    outputs = np.stack(outputs)
-    metas = np.stack(metas)
-    metas = pd.DataFrame(metas, columns=sampleIterator._iter.columns)
+    outputs = np.concatenate(outputs,axis=0)
+    metas = pd.concat(metas)
 
     if len(model.classNames) == 1:
         metas[model.classNames[0]] = outputs
