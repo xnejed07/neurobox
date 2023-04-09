@@ -1,12 +1,13 @@
-
+import numpy as np
 import torch
-from neurobox.dataloaders import DFile
-from neurobox.dataloaders import Mef3
+from neurobox.dataloaders.dfile import DFile
+from neurobox.dataloaders.mef3 import Mef3
 from neurobox.dataloaders.h5 import H5
-from neurobox.pipelines import pipeline_torch
+from neurobox.pipelines import pipeline_torch,pipeline_numpy
 import unittest
-from neurobox.iterators import SessionSampleIterator
+from neurobox.iterators import SessionSampleIterator, SessionBipolarSampleIterator
 from neurobox.utils import generate_PDM_matrix
+import scipy
 
 class test(unittest.TestCase):
     def test_dfile(self):
@@ -73,5 +74,34 @@ class test(unittest.TestCase):
         generate_PDM_matrix(result,'Power',plot=True)
         stop = 1
 
+    def test_bipolar_pipeline(self):
+        file = "/mnt/m/d05/hfo_envelopes/sleep/seeg-102/raw_files/seeg-102_00.h5"
+        H = H5(path=file)
 
+        I = SessionBipolarSampleIterator(H,window=5000,step=5000)
+
+        class RelEntropy:
+            classNames = ['RelEntropy']
+            def __init__(self):
+                pass
+            def inference(self,x):
+                try:
+                    x = np.nan_to_num(x)
+                    y = (x[0,:] - x[0,:].min())/(x[0,:].max() - x[0,:].min())
+                    z = (x[1,:] - x[1,:].min())/(x[1,:].max() - x[1,:].min())
+                    yp = np.histogram(y,bins=10)[0]/y.shape[0]
+                    zp = np.histogram(z,bins=10)[0]/z.shape[0]
+
+                    REN_yz = np.sum(yp * np.log(yp/zp))
+                    REN_zy = np.sum(zp * np.log(zp/yp))
+                    REN = 0.5*(REN_yz+REN_zy)
+                    return REN.reshape(1,1)
+                except Exception as exc:
+                    return np.array([0]).reshape(1,1)
+
+
+
+        result = pipeline_numpy(I,RelEntropy())
+        generate_PDM_matrix(result,'RelEntropy',plot=True)
+        stop = 1
 

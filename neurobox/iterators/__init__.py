@@ -1,1 +1,1 @@
-from .sample import SessionSampleIterator
+from .sample import SessionSampleIterator,SessionBipolarSampleIterator
