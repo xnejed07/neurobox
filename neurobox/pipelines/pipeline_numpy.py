@@ -14,7 +14,7 @@ def pipeline_numpy(sampleIterator, model):
         metas.append(meta)
         outputs.append(y)
     outputs = np.concatenate(outputs,axis=0)
-    metas = pd.concat(metas).reset_index(drop=True)
+    metas = pd.DataFrame(metas).reset_index(drop=True)
 
     if len(model.classNames) == 1:
         metas[model.classNames[0]] = outputs

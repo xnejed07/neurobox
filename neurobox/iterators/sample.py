@@ -105,4 +105,4 @@ class SessionBipolarSampleIterator():
             signal = self.transforms(signal)
 
 
-        return signal,pd.DataFrame(self._iter.iloc[item]).T
+        return signal,self._iter.iloc[item].to_dict()
