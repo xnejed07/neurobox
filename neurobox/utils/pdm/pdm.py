@@ -18,6 +18,7 @@ def generate_PDM_matrix(df,feature_name,time_axis='start_sample',index_axis='cha
         plt.yticks(np.arange(len(PDM)),PDM.index.tolist(),fontsize=3)
         if title is not None:
             plt.title(title)
+            plt.suptitle(feature_name)
         if save_plot is not None:
             plt.savefig(save_plot)
         plt.show()
