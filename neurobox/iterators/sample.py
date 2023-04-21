@@ -40,7 +40,7 @@ class SessionSampleIterator():
             signal = self.transforms(signal)
 
 
-        return signal,self._iter.iloc[item]
+        return signal,self._iter.iloc[item].to_dict()
 
 
 class SessionBipolarSampleIterator():

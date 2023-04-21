@@ -12,8 +12,10 @@ import scipy
 class test(unittest.TestCase):
     def test_dfile(self):
         file = "/mnt/m/d04/eeg_data/kuna_eeg/data-d_fnusa_organizace/seeg/seeg-102-200909/Easrec_sciexp-seeg102_200909-0838.d"
-        D = DFile(file,header_only=True)
-        for data, meta in SessionSampleIterator(session=D,window=15000,step=5000).select_channels(channel_map=['B1','C1']):
+        file = "/mnt/m/d04/eeg_data/kuna_eeg/scalp_5k/stdeeg5kR5-0009-20230310-140045.d"
+        D = DFile(file).select_channels(channel_map=['Fp1','Fp2','Cz']).montage('Cz')
+        I = SessionSampleIterator(session=D,window=15000,step=5000)
+        for data, meta in I:
             stop = 1
         assert True
 

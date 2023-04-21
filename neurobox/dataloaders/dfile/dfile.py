@@ -6,31 +6,59 @@ from neurobox.utils.helper_code import channel_sort_df
 
 
 class DFile():
-    def __init__(self, path, header_only=False):
+    def __init__(self, path):
         self._header = read_d_header(file_name = path)
         self._data = None
         self.path = path
-        if header_only is False:
-            self._preload_data()
+        self._preload_data()
 
     def _preload_data(self):
-        self._data = read_d_data(sheader=self._header[0],
-                                 ch_list=[i for i, ch in enumerate(self._header[1]['channel_names'])],
+        ch_list = [i for i, ch in enumerate(self._header[1]['channel_names'])]
+        _data = read_d_data(sheader=self._header[0],
+                                 ch_list=ch_list,
                                  samp_start=0,
                                  samp_end=self._header[0]['nsamp'] - 1)
-        self._data = self._data.T
+        _data = _data.T
+
+        self._data = dict()
+        for i,ch in enumerate(self._header[1]['channel_names']):
+            self._data[ch] = {'name':ch,
+                              'fsamp':self._header[0]['fsamp'],
+                              'nsamp':self._header[0]['nsamp'],
+                              'ufact':None,
+                              'unit':None,
+                              'start_time':(self._header[1]['time_info'])*1e6,
+                              'end_time': (self._header[1]['time_info'] + self._header[0]['nsamp'] / self._header[0]['fsamp']) * 1e6,
+                              'channel_description': None,
+                              'data':_data[i,:]}
+        stop = 1
+
+    def select_channels(self,channel_map):
+        ch_remove = set(self._data.keys()) - set(channel_map)
+        for ch in ch_remove:
+            self._data.pop(ch)
+        return self
+
+    def montage(self,ref_channel):
+        tmp = dict()
+        ch_list = set(self._data.keys()) - set([ref_channel])
+        for ch in ch_list:
+            tmp[ch+"-"+ref_channel] = {'name':ch+"-"+ref_channel,
+                                       'fsamp': self._data[ch]['fsamp'],
+                                       'nsamp': self._data[ch]['nsamp'],
+                                       'ufact': self._data[ch]['ufact'],
+                                       'unit': self._data[ch]['unit'],
+                                       'start_time': self._data[ch]['start_time'],
+                                       'end_time': self._data[ch]['end_time'],
+                                       'channel_description': self._data[ch]['channel_description'],
+                                        'data':self._data[ch]['data'] - self._data[ref_channel]['data']}
+        self._data = tmp
+        return self
 
     def read_ts_channel_basic_info(self):
         output = []
-        for ch in self._header[1]['channel_names']:
-            output.append({'name':ch,
-                           'fsamp':self._header[0]['fsamp'],
-                           'nsamp':self._header[0]['nsamp'],
-                           'ufact':None,
-                           'unit':None,
-                           'start_time':(self._header[1]['time_info'])*1e6,
-                           'end_time':(self._header[1]['time_info'] + self._header[0]['nsamp']/self._header[0]['fsamp'])*1e6,
-                           'channel_description':None})
+        for _,ch in self._data.items():
+            output.append(ch)
         return output
 
     def read_ts_channel_basic_info_df(self):
@@ -41,20 +69,11 @@ class DFile():
         if isinstance(channel_map,str):
             channel_map = [channel_map]
 
-        ch_idxs = []
+        out = []
         for ch in channel_map:
-            if ch in self._header[1]['channel_names']:
-                ch_idxs.append(self._header[1]['channel_names'].index(ch))
-            else:
-                raise Exception(f"Invalid channel name: {ch}")
+            out.append(self._data[ch]['data'][sample_map[0]:sample_map[1]])
 
-        if len(ch_idxs) == 0:
-            raise Exception("Empty channel list!")
-
-        if self._data is None:
-            self._preload_data()
-
-        return self._data[ch_idxs,sample_map[0]:sample_map[1]]
+        return out
 
 
 
