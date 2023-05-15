@@ -4,6 +4,12 @@ from neurobox.utils import channel_sort_df
 import numpy as np
 
 class Mef3(MefSession):
+    def __init__(self,session_path,password,transforms=None):
+        super(Mef3, self).__init__(session_path,password)
+        self.session_path = session_path
+        self.transforms = transforms
+        self._bi = self.read_ts_channel_basic_info_df()
+
     def read_ts_channel_basic_info_df(self):
         bi = super().read_ts_channel_basic_info()
         bi = pd.DataFrame(bi)
@@ -14,8 +20,16 @@ class Mef3(MefSession):
             bi[k] = bi[k].apply(lambda x: x.decode('ascii'))
         return bi
 
-    def read_ts_channels_sample(self, channel_map, sample_map, process_n=None,transforms=None):
+    def read_ts_channels_sample(self, channel_map, sample_map, process_n=None):
         data = super().read_ts_channels_sample(channel_map,sample_map,process_n)
         if transforms:
-            data = [transforms(x) for x in data]
+            data = [self.transforms(x) for x in data]
         return data
+
+    def iterchannels(self,sample_map=None):
+        if sample_map is None:
+            sample_map = [0,self._bi.iloc[0]['nsamp']]
+
+        for ch in self._bi['name'].tolist():
+            data = self.read_ts_channels_sample(channel_map=[ch],sample_map=sample_map)
+            yield ch, data
