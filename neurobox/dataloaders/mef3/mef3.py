@@ -57,3 +57,18 @@ class Mef3(MefSession):
         output = pd.DataFrame(output)
         return output
 
+
+    def create_batch_uutc(self,df):
+        output = []
+        for i,row in df.iterrows():
+            data = self.read_ts_channels_uutc(channel_map=row['channel_name'],
+                                              uutc_map=[row['uutc_start'],row['uutc_stop']])
+            output.append({'channel_name': row['channel_name'],
+                           'start_sample': row['uutc_start'],
+                           'stop_sample': row['uutc_stop'],
+                           'data': data})
+
+        output = pd.DataFrame(output)
+        return output
+
+
