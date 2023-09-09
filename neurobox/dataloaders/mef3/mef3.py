@@ -27,6 +27,12 @@ class Mef3(MefSession):
             data = [self.transforms(x) for x in data]
         return data
 
+    def read_ts_channels_uutc(self, channel_map, uutc_map, process_n=None, out_nans=True):
+        data = super().read_ts_channels_uutc(channel_map,uutc_map,process_n,out_nans)
+        if self.transforms:
+            data = [self.transforms(x) for x in data]
+        return data
+
     def iterchannels(self,sample_map=None):
         if sample_map is None:
             sample_map = [0,self._bi.iloc[0]['nsamp']]
@@ -58,7 +64,14 @@ class Mef3(MefSession):
         return output
 
 
-    def create_batch_uutc(self,df):
+    def read_ts_batch_uutc(self,df):
+        if 'channel_name' not in df.columns:
+            raise Exception("channel_name not in df")
+        if 'uutc_start' not in df.columns:
+            raise Exception("uutc_start not in df")
+        if 'uutc_stop' not in df.columns:
+            raise Exception("uutc_stop not in df")
+
         output = []
         for i,row in df.iterrows():
             data = self.read_ts_channels_uutc(channel_map=row['channel_name'],
