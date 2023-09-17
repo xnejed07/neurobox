@@ -9,9 +9,10 @@ class Mef3(MefSession):
         super(Mef3, self).__init__(session_path,password)
         self.session_path = session_path
         self.transforms = transforms
-        self._bi = self.read_ts_channel_basic_info_df()
+        self.password = password
+        self._bi = self.read_ts_channel_basic_info()
 
-    def read_ts_channel_basic_info_df(self):
+    def read_ts_channel_basic_info(self):
         bi = super().read_ts_channel_basic_info()
         bi = pd.DataFrame(bi)
         bi = channel_sort_df(bi,'name')
@@ -19,6 +20,8 @@ class Mef3(MefSession):
             bi[k] = bi[k].apply(lambda x: x[0])
         for k in [ 'unit','channel_description']:
             bi[k] = bi[k].apply(lambda x: x.decode('ascii'))
+        bi['path'] = self.session_path
+        bi['password'] = self.password
         return bi
 
     def read_ts_channels_sample(self, channel_map, sample_map, process_n=None):
