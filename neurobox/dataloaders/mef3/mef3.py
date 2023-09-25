@@ -9,9 +9,13 @@ class Mef3(MefSession):
     def __init__(self,session_path,password,transforms=None):
         super(Mef3, self).__init__(session_path,password)
         self.session_path = session_path
-        self.transforms = transforms
         self.password = password
         self._bi = self.read_ts_channel_basic_info()
+        self.transforms = transforms
+        self.fs = self._bi.iloc[0]['fsamp']
+
+    def set_transforms(self,transforms):
+        self.transforms = transforms
 
     def read_ts_channel_basic_info(self):
         bi = super().read_ts_channel_basic_info()
