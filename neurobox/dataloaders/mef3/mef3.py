@@ -78,8 +78,8 @@ class Mef3(MefSession):
         for ch, start_sample, stop_sample, data in tqdm(self.iter_segments_uutc(uutc_window)):
             y = model.run(data)
             output.append({'channel_name':ch,
-                           'start_sample': start_sample,
-                           'stop_sample':stop_sample,
+                           'start_time': start_sample,
+                           'stop_time':stop_sample,
                            'data':y})
 
         output = pd.DataFrame(output)
