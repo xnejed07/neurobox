@@ -3,6 +3,7 @@ import pandas as pd
 from neurobox.utils import channel_sort_df
 import numpy as np
 from tqdm import tqdm
+import unittest
 
 class Mef3(MefSession):
     def __init__(self,session_path,password,transforms=None):
@@ -35,6 +36,15 @@ class Mef3(MefSession):
         if self.transforms:
             data = [self.transforms(x) for x in data]
         return data
+
+    def select_channels(self,channels):
+        keep = []
+        for i,row in self._bi.iterrows():
+            if row['name'] in channels:
+                keep.append(row)
+        self._bi = pd.DataFrame(keep)
+        return self
+
 
     def iterchannels(self,sample_map=None):
         if sample_map is None:
@@ -88,3 +98,8 @@ class Mef3(MefSession):
         return output
 
 
+class Test(unittest.TestCase):
+    def test_select(self):
+        pth = "/home/nejedly/Desktop/sub-032_ses-001_task-rest_run-01_ieeg.mefd"
+        ms = Mef3(pth,"bemena").select_channels(["B1","B2"])
+        stop = 1
