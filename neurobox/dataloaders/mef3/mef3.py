@@ -64,13 +64,14 @@ class Mef3(MefSession):
                 start_sample += sample_window
 
     def iter_segments_uutc(self,uutc_window):
-        for ch in self._bi['name'].tolist():
-            start_uutc = self._bi.iloc[0]['start_time']
-            while (start_uutc + uutc_window) < self._bi.iloc[0]['end_time']:
+        for i,row in self._bi.iterrows():
+            ch = row['name']
+            start_uutc = row['start_time']
+            while (start_uutc + uutc_window) < row['end_time']:
                 stop_uutc = start_uutc + uutc_window
                 data = self.read_ts_channels_uutc(channel_map=[ch],uutc_map=[start_uutc,stop_uutc])[0]
                 yield ch, start_uutc, stop_uutc, data
-                start_uutc += stop_uutc
+                start_uutc += uutc_window
 
 
     def deploy_model_uutc(self,model,uutc_window):
@@ -121,5 +122,5 @@ class Test(unittest.TestCase):
                 return np.zeros_like(x)
 
         pth = "/home/nejedly/Desktop/sub-032_ses-001_task-rest_run-01_ieeg.mefd"
-        ms = Mef3(pth,"bemena").deploy_model_uutc(model=MDL(),uutc_window=10*1000000)
+        ms = Mef3(pth,"bemena").select_channels("B1").deploy_model_uutc(model=MDL(),uutc_window=10*1000000)
         stop = 1
