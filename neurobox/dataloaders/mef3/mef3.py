@@ -54,7 +54,7 @@ class Mef3(MefSession):
             data = self.read_ts_channels_sample(channel_map=[ch],sample_map=sample_map)[0]
             yield ch, data
 
-    def itersegments(self,sample_window):
+    def iter_segments_nsamp(self,sample_window):
         for ch in self._bi['name'].tolist():
             start_sample = 0
             while (start_sample + sample_window) < self._bi.iloc[0]['nsamp']:
@@ -63,10 +63,19 @@ class Mef3(MefSession):
                 yield ch, start_sample, stop_sample, data
                 start_sample += sample_window
 
+    def iter_segments_uutc(self,uutc_window):
+        for ch in self._bi['name'].tolist():
+            start_uutc = self._bi.iloc[0]['start_time']
+            while (start_uutc + uutc_window) < self._bi.iloc[0]['end_time']:
+                stop_uutc = start_uutc + uutc_window
+                data = self.read_ts_channels_uutc(channel_map=[ch],uutc_map=[start_uutc,stop_uutc])[0]
+                yield ch, start_uutc, stop_uutc, data
+                start_uutc += stop_uutc
 
-    def deploy_model(self,model,sample_window):
+
+    def deploy_model_uutc(self,model,uutc_window):
         output = []
-        for ch, start_sample, stop_sample, data in tqdm(self.itersegments(sample_window)):
+        for ch, start_sample, stop_sample, data in tqdm(self.iter_segments_uutc(uutc_window)):
             y = model.run(data)
             output.append({'channel_name':ch,
                            'start_sample': start_sample,
@@ -102,4 +111,15 @@ class Test(unittest.TestCase):
     def test_select(self):
         pth = "/home/nejedly/Desktop/sub-032_ses-001_task-rest_run-01_ieeg.mefd"
         ms = Mef3(pth,"bemena").select_channels(["B1","B2"])
+        stop = 1
+
+    def test_deploy_model(self):
+        class MDL():
+            def __init__(self):
+                pass
+            def run(self,x):
+                return np.zeros_like(x)
+
+        pth = "/home/nejedly/Desktop/sub-032_ses-001_task-rest_run-01_ieeg.mefd"
+        ms = Mef3(pth,"bemena").deploy_model_uutc(model=MDL(),uutc_window=10*1000000)
         stop = 1
