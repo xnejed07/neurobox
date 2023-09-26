@@ -4,14 +4,20 @@ from neurobox.utils import channel_sort_df
 import numpy as np
 from tqdm import tqdm
 import unittest
+from multiprocessing import Process
 
 class Mef3(MefSession):
-    def __init__(self,session_path,password,transforms=None):
+    def __init__(self,session_path,password,transforms=None,test_read=False):
         super(Mef3, self).__init__(session_path,password)
         self.session_path = session_path
         self.password = password
-        self._bi = self.read_ts_channel_basic_info()
         self.transforms = transforms
+
+        if test_read:
+            if not self.is_readable():
+                raise Exception("File not readable")
+
+        self._bi = self.read_ts_channel_basic_info()
         self.fs = self._bi.iloc[0]['fsamp']
 
     def set_transforms(self,transforms):
@@ -112,6 +118,16 @@ class Mef3(MefSession):
         return output
 
 
+    def is_readable(self):
+        p = Process(target=self.read_ts_channel_basic_info)
+        p.start()
+        p.join()
+        if p.exitcode != 0:
+            return False
+        else:
+            return True
+
+
 class Test(unittest.TestCase):
     def test_select(self):
         pth = "/home/nejedly/Desktop/sub-032_ses-001_task-rest_run-01_ieeg.mefd"
@@ -127,4 +143,10 @@ class Test(unittest.TestCase):
 
         pth = "/home/nejedly/Desktop/sub-032_ses-001_task-rest_run-01_ieeg.mefd"
         ms = Mef3(pth,"bemena").select_channels("B1").deploy_model_uutc(model=MDL(),uutc_window=10*1000000)
+        stop = 1
+
+    def test_readable(self):
+        #pth = "/home/nejedly/Desktop/sub-032_ses-001_task-rest_run-01_ieeg.mefd"
+        pth = "/mnt/m/d04/eeg_data/kuna_eeg/fnusa_dataset/sub-036/ses-001/ieeg/sub-036_ses-001_task-oddball_run-01_ieeg.mefd"
+        ms = Mef3(pth, "bemena").is_readable()
         stop = 1
