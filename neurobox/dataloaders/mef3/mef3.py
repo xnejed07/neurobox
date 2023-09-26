@@ -6,6 +6,23 @@ from tqdm import tqdm
 import unittest
 from multiprocessing import Process
 
+
+class Mef3Tester(MefSession):
+    def __init__(self,session_path,password):
+        super(Mef3Tester, self).__init__(session_path,password)
+        self.session_path = session_path
+        self.password = password
+
+    def is_readable(self):
+        p = Process(target=self.read_ts_channel_basic_info)
+        p.start()
+        p.join()
+        if p.exitcode != 0:
+            return False
+        else:
+            return True
+
+
 class Mef3(MefSession):
     def __init__(self,session_path,password,transforms=None,test_read=False):
         super(Mef3, self).__init__(session_path,password)
