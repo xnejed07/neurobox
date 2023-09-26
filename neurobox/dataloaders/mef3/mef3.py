@@ -14,12 +14,15 @@ class Mef3Tester(MefSession):
         self.password = password
 
     def is_readable(self):
+        print(self.session_path)
         p = Process(target=self.read_ts_channel_basic_info)
         p.start()
         p.join()
         if p.exitcode != 0:
+            print(f"[OK] :{self.session_path}")
             return False
         else:
+            print(f"[FAIL] :{self.session_path}")
             return True
 
 
