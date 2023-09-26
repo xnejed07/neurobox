@@ -1,1 +1,1 @@
-from bids import *
+from bids import BIDSPath
