@@ -19,10 +19,10 @@ class Mef3Tester(MefSession):
         p.start()
         p.join()
         if p.exitcode != 0:
-            print(f"[OK] :{self.session_path}")
+            print(f"[OK]: {self.session_path}")
             return False
         else:
-            print(f"[FAIL] :{self.session_path}")
+            print(f"[FAIL]: {self.session_path}")
             return True
 
 
